@@ -16,5 +16,6 @@ public class SuggestionModel : IIdentity
         public ulong? MemberId { get; set; }
         public string? Type { get; set; }
         public string? Suggestion { get; set; }
+        public string? Status { get; set; }
     }
 }

@@ -33,8 +33,6 @@ try
                 .Build();
             x.AddConfiguration(configuration);
         })
-        .UseSerilog()
-        .UseConsoleLifetime()
         .ConfigureDiscordHost((context, config) =>
         {
             config.SocketConfig = new DiscordSocketConfig
@@ -67,13 +65,14 @@ try
         {
             services
                 .AddHostedService<HandlerService>()
-                .AddSingleton(new PlungerDatabase(
-                    context.Configuration["PlungerDatabase:DatabaseName"],
-                    context.Configuration["PlungerDatabase:ConnectionString"]))
+                .AddSingleton<PlungerDatabase>()
+                // .AddSingleton(new PlungerDatabase(
+                //     context.Configuration["PlungerDatabase:DatabaseName"],
+                //     context.Configuration["PlungerDatabase:ConnectionString"]))
                 .AddSingleton(new InteractiveConfig { DefaultTimeout = TimeSpan.FromMinutes(1) })
                 .AddSingleton<InteractiveService>()
                 .AddHttpClient();
-
+                
             services
                 .Configure<PlungerDatabaseConfig>(context.Configuration.GetSection("PlungerDatabase"));
             // services.AddHttpClient("Popcat", x => x.BaseAddress = new Uri(context.Configuration.GetSection("API")["Popcat"]));
@@ -90,6 +89,8 @@ try
             //     x.BufferSize = 5000;
             // });
         })
+        .UseSerilog()
+        .UseConsoleLifetime()
         .Build();
     await host.RunAsync();
     return 0;

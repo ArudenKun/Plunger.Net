@@ -1,10 +1,11 @@
+using Discord;
 using Discord.Interactions;
+using Discord.WebSocket;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
+using Plunger.Attributes;
 using Plunger.Database;
-using Plunger.Database.Models;
 
 namespace Plunger.Modules;
 
@@ -19,9 +20,10 @@ public class Test : PlungerInteractionModuleBase
     {
     }
 
-    [SlashCommand("test", "testing")]
+    [SlashCommand("timepsan", "testing")]
     public async Task TestAsync([Summary("time", "input time")] TimeSpan timeSpan)
     {
+        
         await RespondAsync($"{timeSpan}");
     }
 }

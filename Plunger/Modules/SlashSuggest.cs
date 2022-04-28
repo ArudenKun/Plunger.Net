@@ -8,7 +8,7 @@ using MongoDB.Driver;
 using Plunger.Database;
 using Plunger.Database.Models;
 using static Plunger.Database.Models.SuggestionModel;
-using static Plunger.Models.Enum;
+using static Plunger.Enum.Enums;
 
 namespace Plunger.Modules;
 
@@ -58,10 +58,10 @@ public class SlashSuggest : PlungerInteractionModuleBase
                     }
                 }
         });
-        await Context.Interaction.ModifyOriginalResponseAsync(x =>
+        await Context.Interaction.ModifyOriginalResponseAsync(_ =>
         {
-            x.Embed = Embed;
-            x.Components = Buttons;
+            _.Embed = Embed;
+            _.Components = Buttons;
         });
     }
 
@@ -91,8 +91,8 @@ public class SlashSuggest : PlungerInteractionModuleBase
             var suggestion = Interaction.Message.Embeds.FirstOrDefault()!.Fields[0].Value;
             var type = Interaction.Message.Embeds.FirstOrDefault()!.Fields[1].Value;
             var newButtons = new ComponentBuilder()
-            .WithButton("✔ Accept", "suggest-accept", ButtonStyle.Success)
-            .WithButton("❌ Decline", "suggest-decline", ButtonStyle.Danger)
+            .WithButton("✔ Accept", "suggest-accept", ButtonStyle.Success, disabled: true)
+            .WithButton("❌ Decline", "suggest-decline", ButtonStyle.Danger, disabled: false)
             .WithButton("📑 Finalize", "suggest-final", ButtonStyle.Secondary, disabled: false)
             .Build();
 
@@ -132,7 +132,7 @@ public class SlashSuggest : PlungerInteractionModuleBase
 
         var suggestion = await Database.FindDocumentAsync<SuggestionModel>(SuggestionCollection,
             _ => _.GuildId == Context.Guild.Id && _.MessageId == Interaction!.Message.Interaction.Id);
-
+        
         if (suggestion is null)
         {
             await RespondAsync("Suggestion Does Not Exist In The Database", ephemeral: true);
@@ -144,8 +144,8 @@ public class SlashSuggest : PlungerInteractionModuleBase
             var suggestion = Interaction.Message.Embeds.FirstOrDefault()!.Fields[0].Value;
             var type = Interaction.Message.Embeds.FirstOrDefault()!.Fields[1].Value;
             var newButtons = new ComponentBuilder()
-            .WithButton("✔ Accept", "suggest-accept", ButtonStyle.Success)
-            .WithButton("❌ Decline", "suggest-decline", ButtonStyle.Danger)
+            .WithButton("✔ Accept", "suggest-accept", ButtonStyle.Success, disabled: false)
+            .WithButton("❌ Decline", "suggest-decline", ButtonStyle.Danger, disabled: true)
             .WithButton("📑 Finalize", "suggest-final", ButtonStyle.Secondary, disabled: false)
             .Build();
 

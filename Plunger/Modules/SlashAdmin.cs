@@ -8,9 +8,6 @@ using Plunger.Database;
 
 namespace Plunger.Modules;
 
-[RequireOwner(Group = "Admin")]
-[RequireUserPermission(GuildPermission.Administrator, Group = "Admin")]
-[RequireUserPermission(GuildPermission.ManageChannels, Group = "Admin")]
 public class SlashAdmin : PlungerInteractionModuleBase
 {
     private readonly IHost _host;
@@ -25,7 +22,7 @@ public class SlashAdmin : PlungerInteractionModuleBase
     {
         _host = host;
     }
-
+    
     [SlashCommand("shutdown", "Turns off the bot")]
     public async Task Shutdown()
     {

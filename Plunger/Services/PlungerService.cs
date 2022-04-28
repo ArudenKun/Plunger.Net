@@ -16,7 +16,7 @@ namespace Plunger.Services
         public readonly IServiceProvider ServiceProvider;
         public readonly CommandService CommandService;
         public readonly InteractionService InteractionService;
-        public readonly PlungerDatabase Database;
+        public PlungerDatabase Database;
         // public readonly DataAccessLayer DataAcessLayer;
 
         public PlungerService(

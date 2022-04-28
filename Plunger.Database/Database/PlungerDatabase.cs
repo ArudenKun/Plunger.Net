@@ -1,4 +1,5 @@
 ﻿using System.Linq.Expressions;
+using Microsoft.Extensions.Options;
 using MongoDB.Bson;
 using MongoDB.Driver;
 using MongoDB.Driver.Core.Clusters;
@@ -28,10 +29,16 @@ public class PlungerDatabase
     /// </summary>
     /// <param name="database">The name of the database.</param>
     /// <param name="url">The connection string.</param>
-    public PlungerDatabase(string database, string url)
+    public PlungerDatabase(string database, string url) //string database, string url
     {
         _client = new MongoClient(new MongoUrlBuilder(url).ToMongoUrl());
         _database = _client.GetDatabase(database);
+    }
+
+    public PlungerDatabase(IOptions<PlungerDatabaseConfig> config) //string database, string url
+    {
+        _client = new MongoClient(new MongoUrlBuilder(config.Value.ConnectionString).ToMongoUrl());
+        _database = _client.GetDatabase(config.Value.DatabaseName);
     }
 
     /// <summary>

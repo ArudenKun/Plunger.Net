@@ -16,6 +16,9 @@ public class PlungerInteractionModuleBase : InteractionModuleBase<SocketInteract
 
     // public readonly IOptions<PlungerDatabaseConfig> PlungerDatabaseConfig;
 
+    // private readonly IServiceScope scope;
+    // private readonly IServiceProvider? serviceProvider;
+
     public PlungerInteractionModuleBase(
         IConfiguration configuration,
         IHostEnvironment hostEnvironment,

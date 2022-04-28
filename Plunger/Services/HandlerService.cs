@@ -77,16 +77,17 @@ public class HandlerService : PlungerService
         // }
 
         Logger.LogInformation("Connecting to the database...");
-        bool isDbConnected = false;
+        // bool isDbConnected = false;
         Exception? dbException = null;
-        try
-        {
-            isDbConnected = Database.IsConnected;
-        }
-        catch (TimeoutException e)
-        {
-            dbException = e;
-        }
+        // try
+        // {
+        //     // Database = new PlungerDatabase(Configuration["PlungerDatabase:DatabaseName"], Configuration["PlungerDatabase:ConnectionString"]);
+        //     isDbConnected = Database.IsConnected;
+        // }
+        // catch (TimeoutException e)
+        // {
+        //     dbException = e;
+        // }
 
         if (Database.IsConnected)
         {

@@ -1,11 +1,6 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+namespace Plunger.Enum;
 
-namespace Plunger.Models;
-
-public class Enum
+public class Enums
 {
     public enum SuggestionTypes
     {
