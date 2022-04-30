@@ -28,5 +28,6 @@
 	</ItemGroup>
 	<ItemGroup>
 	  <ProjectReference Include="..\Plunger.Database\Plunger.Database.csproj" />
+	  <ProjectReference Include="..\Plunger.APIs\Plunger.APIs.csproj" />
 	</ItemGroup>
 </Project>

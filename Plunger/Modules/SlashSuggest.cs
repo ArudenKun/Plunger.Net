@@ -7,8 +7,8 @@ using Microsoft.Extensions.Logging;
 using MongoDB.Driver;
 using Plunger.Database;
 using Plunger.Database.Models;
+using Plunger.Models.Enums;
 using static Plunger.Database.Models.SuggestionModel;
-using static Plunger.Enum.Enums;
 
 namespace Plunger.Modules;
 
@@ -24,12 +24,12 @@ public class SlashSuggest : PlungerInteractionModuleBase
     }
 
     [SlashCommand("suggest", "Creates a suggestion")]
-    public async Task Suggest(SuggestionTypes type, string suggestion)
+    public async Task Suggest(SuggestionType type, string suggestion)
     {
         var Embed = new EmbedBuilder()
             .WithColor(Color.DarkerGrey)
             .WithAuthor($"{Context.Interaction.User.Username}#{Context.Interaction.User.Discriminator}",
-            Context.Interaction.User.GetAvatarUrl() ?? Context.Interaction.User.GetDefaultAvatarUrl())
+                Context.Interaction.User.GetAvatarUrl() ?? Context.Interaction.User.GetDefaultAvatarUrl())
             .AddField("Suggestion", suggestion, false)
             .AddField("Type", type, true)
             .AddField("Status", "Pending", true)
@@ -43,7 +43,6 @@ public class SlashSuggest : PlungerInteractionModuleBase
             .Build();
 
         await DeferAsync();
-        // Context.Guild.Id, Context.Interaction.Id, Context.Interaction.User.Id
         await Database.InsertDocumentAsync(SuggestionCollection, new SuggestionModel()
         {
             GuildId = Context.Guild.Id,
@@ -58,27 +57,16 @@ public class SlashSuggest : PlungerInteractionModuleBase
                     }
                 }
         });
-        await Context.Interaction.ModifyOriginalResponseAsync(_ =>
-        {
-            _.Embed = Embed;
-            _.Components = Buttons;
-        });
+        await FollowupAsync(embed: Embed, components: Buttons);
     }
 
     [ComponentInteraction("suggest-accept")]
     [RequireUserPermission(GuildPermission.Administrator)]
     public async Task SuggestAccept()
     {
-        var Interaction = Context.Interaction as SocketMessageComponent;
-
-        // if (!await Database.SuggestionExistAsync(Context.Guild.Id, Interaction!.Message.Interaction.Id))
-        // {
-        //     await RespondAsync("Suggestion Does Not Exist In The Database", ephemeral: true);
-        //     return;
-        // }
-
+        var interaction = Context.Interaction as SocketMessageComponent;
         var suggestion = await Database.FindDocumentAsync<SuggestionModel>(SuggestionCollection,
-            _ => _.GuildId == Context.Guild.Id && _.MessageId == Interaction!.Message.Interaction.Id);
+            _ => _.GuildId == Context.Guild.Id && _.MessageId == interaction!.Message.Interaction.Id);
 
         if (suggestion is null)
         {
@@ -86,10 +74,10 @@ public class SlashSuggest : PlungerInteractionModuleBase
             return;
         }
 
-        await Interaction!.UpdateAsync(x =>
+        await interaction!.UpdateAsync(x =>
         {
-            var suggestion = Interaction.Message.Embeds.FirstOrDefault()!.Fields[0].Value;
-            var type = Interaction.Message.Embeds.FirstOrDefault()!.Fields[1].Value;
+            var suggestion = interaction.Message.Embeds.FirstOrDefault()!.Fields[0].Value;
+            var type = interaction.Message.Embeds.FirstOrDefault()!.Fields[1].Value;
             var newButtons = new ComponentBuilder()
             .WithButton("✔ Accept", "suggest-accept", ButtonStyle.Success, disabled: true)
             .WithButton("❌ Decline", "suggest-decline", ButtonStyle.Danger, disabled: false)
@@ -110,7 +98,7 @@ public class SlashSuggest : PlungerInteractionModuleBase
             x.Components = newButtons;
         });
 
-        if (Interaction.HasResponded)
+        if (interaction.HasResponded)
         {
             await FollowupAsync("Suggestion Accepted", ephemeral: true);
             return;
@@ -122,7 +110,7 @@ public class SlashSuggest : PlungerInteractionModuleBase
     [RequireUserPermission(GuildPermission.Administrator)]
     public async Task SuggestDecline()
     {
-        var Interaction = Context.Interaction as SocketMessageComponent;
+        var interaction = Context.Interaction as SocketMessageComponent;
 
         // if (!await Database.SuggestionExistAsync(Context.Guild.Id, Interaction!.Message.Interaction.Id))
         // {
@@ -131,18 +119,18 @@ public class SlashSuggest : PlungerInteractionModuleBase
         // }
 
         var suggestion = await Database.FindDocumentAsync<SuggestionModel>(SuggestionCollection,
-            _ => _.GuildId == Context.Guild.Id && _.MessageId == Interaction!.Message.Interaction.Id);
-        
+            _ => _.GuildId == Context.Guild.Id && _.MessageId == interaction!.Message.Interaction.Id);
+
         if (suggestion is null)
         {
             await RespondAsync("Suggestion Does Not Exist In The Database", ephemeral: true);
             return;
         }
 
-        await Interaction!.UpdateAsync(x =>
+        await interaction!.UpdateAsync(x =>
         {
-            var suggestion = Interaction.Message.Embeds.FirstOrDefault()!.Fields[0].Value;
-            var type = Interaction.Message.Embeds.FirstOrDefault()!.Fields[1].Value;
+            var suggestion = interaction.Message.Embeds.FirstOrDefault()!.Fields[0].Value;
+            var type = interaction.Message.Embeds.FirstOrDefault()!.Fields[1].Value;
             var newButtons = new ComponentBuilder()
             .WithButton("✔ Accept", "suggest-accept", ButtonStyle.Success, disabled: false)
             .WithButton("❌ Decline", "suggest-decline", ButtonStyle.Danger, disabled: true)
@@ -163,7 +151,7 @@ public class SlashSuggest : PlungerInteractionModuleBase
             x.Components = newButtons;
         });
 
-        if (Interaction.HasResponded)
+        if (interaction.HasResponded)
         {
             await FollowupAsync("Suggestion Declined", ephemeral: true);
             return;
@@ -175,27 +163,21 @@ public class SlashSuggest : PlungerInteractionModuleBase
     [RequireUserPermission(GuildPermission.Administrator)]
     public async Task SuggestFinal()
     {
-        var Interaction = Context.Interaction as SocketMessageComponent;
-
-        // if (!await Database.SuggestionExistAsync(Context.Guild.Id, Interaction!.Message.Interaction.Id))
-        // {
-        //     await RespondAsync("Suggestion Does Not Exist In The Database", ephemeral: true);
-        //     return;
-        // }
+        var interaction = Context.Interaction as SocketMessageComponent;
         var suggestion = await Database.FindDocumentAsync<SuggestionModel>(SuggestionCollection,
-            _ => _.GuildId == Context.Guild.Id && _.MessageId == Interaction!.Message.Interaction.Id);
+            _ => _.GuildId == Context.Guild.Id && _.MessageId == interaction!.Message.Interaction.Id);
 
         if (suggestion is null)
         {
-            await RespondAsync("Suggestion Does Not Exist In The Database", ephemeral: true);
+            await RespondAsync("Suggestion Does Not Exist in The Database", ephemeral: true);
             return;
         }
 
-        await Interaction!.UpdateAsync(x =>
+        await interaction!.UpdateAsync(x =>
         {
-            string suggestion = Interaction.Message.Embeds.FirstOrDefault()!.Fields[0].Value;
-            string type = Interaction.Message.Embeds.FirstOrDefault()!.Fields[1].Value;
-            string status = Interaction.Message.Embeds.FirstOrDefault()!.Fields[2].Value;
+            string suggestion = interaction.Message.Embeds.FirstOrDefault()!.Fields[0].Value;
+            string type = interaction.Message.Embeds.FirstOrDefault()!.Fields[1].Value;
+            string status = interaction.Message.Embeds.FirstOrDefault()!.Fields[2].Value;
             var newEmbed = new EmbedBuilder()
                 .WithColor(Color.Gold)
                 .WithAuthor($"{Context.Interaction.User.Username}#{Context.Interaction.User.Discriminator}",
@@ -209,9 +191,8 @@ public class SlashSuggest : PlungerInteractionModuleBase
             x.Embed = newEmbed;
             x.Components = null;
         });
-        // await Database.DeleteDocumentAsync(Context.Guild.Id, Interaction.Message.Interaction.Id);
         await Database.DeleteDocumentAsync(SuggestionCollection, suggestion);
-        if (Interaction.HasResponded)
+        if (interaction.HasResponded)
         {
             await FollowupAsync("Suggestion Finalized", ephemeral: true);
             return;

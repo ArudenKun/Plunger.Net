@@ -51,4 +51,5 @@ public class PlungerInteractionModuleBase : InteractionModuleBase<SocketInteract
 
     public string SuggestionCollection => Configuration["PlungerDatabase:SuggestionCollection"];
     public string GuildCollection => Configuration["PlungerDatabase:GuildCollection"];
+    public string LockdownCollection => Configuration["PlungerDatabase:LockdownCollection"];
 }

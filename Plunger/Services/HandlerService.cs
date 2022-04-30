@@ -9,8 +9,8 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Plunger.Commons;
 using System.Reflection;
-using Plunger.Parsers;
 using Plunger.Database;
+using Plunger.TypeConverters;
 
 namespace Plunger.Services;
 
@@ -38,7 +38,7 @@ public class HandlerService : PlungerService
     {
         // Process the InteractionCreated payloads to execute Interactions commands
         Client.InteractionCreated += HandleInteraction;
-        Client.MessageReceived += MessageReceived;
+        Client.MessageReceived += OnMessageReceived;
 
         // Process the command execution results
         CommandService.CommandExecuted += CommandExecuted;
@@ -165,7 +165,7 @@ public class HandlerService : PlungerService
         await context.Channel.SendMessageAsync(embed: error);
     }
 
-    private async Task MessageReceived(SocketMessage incomingMessage)
+    private async Task OnMessageReceived(SocketMessage incomingMessage)
     {
         if (incomingMessage is not SocketUserMessage message) return;
         if (message.Source != MessageSource.User) return;

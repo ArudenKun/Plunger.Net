@@ -5,6 +5,8 @@ using Fergun.Interactive;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Plunger.APIs;
+using Plunger.APIs.Interfaces;
 using Plunger.Database;
 using Plunger.Services;
 using Serilog;
@@ -21,7 +23,7 @@ Log.Logger = new LoggerConfiguration()
 
 try
 {
-    Log.Information("Starting Bot");
+    Log.Information("Starting Bot...");
     var host = Host.CreateDefaultBuilder(args)
         .ConfigureAppConfiguration(x =>
         {
@@ -66,15 +68,16 @@ try
             services
                 .AddHostedService<HandlerService>()
                 .AddSingleton<PlungerDatabase>()
-                // .AddSingleton(new PlungerDatabase(
-                //     context.Configuration["PlungerDatabase:DatabaseName"],
-                //     context.Configuration["PlungerDatabase:ConnectionString"]))
                 .AddSingleton(new InteractiveConfig { DefaultTimeout = TimeSpan.FromMinutes(1) })
                 .AddSingleton<InteractiveService>()
                 .AddHttpClient();
                 
             services
                 .Configure<PlungerDatabaseConfig>(context.Configuration.GetSection("PlungerDatabase"));
+            
+            services
+                .AddScoped<IPopcat, Popcat>()
+                .AddScoped<IWaifu, Waifu>();
             // services.AddHttpClient("Popcat", x => x.BaseAddress = new Uri(context.Configuration.GetSection("API")["Popcat"]));
             // services.AddHttpClient("WaifuPics", x => x.BaseAddress = new Uri(context.Configuration.GetSection("API")["WaifuPics"]));
 
