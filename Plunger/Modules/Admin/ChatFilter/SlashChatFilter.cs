@@ -19,7 +19,7 @@ public class SlashChatFilter : PlungerInteractionModuleBase
         IConfiguration configuration,
         IHostEnvironment hostEnvironment,
         IHttpClientFactory httpClientFactory,
-        ILogger<PlungerInteractionModuleBase> logger,
+        ILogger<SlashChatFilter> logger,
         PlungerDbContext database) : base(configuration, hostEnvironment, httpClientFactory, logger, database)
     {
     }
@@ -56,7 +56,7 @@ public class SlashChatFilter : PlungerInteractionModuleBase
             LoggingChannelId = channel.Id
         })
         .RunAsync();
-
+        await Database.SaveChangesAsync();
         if (ChatFilterCache.FilterLogs.ContainsValue(channel.Id))
         {
             await RespondAsync($"<#{channel.Id}> has been set as the logging channel for the chat filter", ephemeral: true);
@@ -111,13 +111,11 @@ public class SlashChatFilter : PlungerInteractionModuleBase
                         ChatFilterCache.Filter.Add(k, new List<string> { word });
                     }
                 }
-                // config.Words = config.Words.Concat(newWords).ToList();
                 Database.Guilds!.Update(config);
                 await Database.SaveChangesAsync();
                 await RespondAsync($"Added {newWords.Count} new word(s) to the filter");
                 break;
             case ChatFilterOption.Remove:
-                Database.Guilds.Attach(config!);
                 if (config == null)
                 {
                     await RespondAsync("There is no word to remove");

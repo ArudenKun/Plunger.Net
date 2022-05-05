@@ -11,7 +11,7 @@ using Plunger.Data;
 namespace Plunger.Data.Migrations
 {
     [DbContext(typeof(PlungerDbContext))]
-    [Migration("20220505073819_Initial")]
+    [Migration("20220505105243_Initial")]
     partial class Initial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
