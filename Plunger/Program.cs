@@ -72,7 +72,6 @@ try
                 .AddDbContext<PlungerDbContext>(_ => 
                     _.UseSqlite(context.Configuration.GetConnectionString("Default")));
 
-
             services
                 .AddScoped<IPopcat, Popcat>()
                 .AddScoped<IWaifu, Waifu>();

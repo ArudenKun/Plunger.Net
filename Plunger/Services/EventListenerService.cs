@@ -16,7 +16,7 @@ public class EventListenerService : PlungerService
 {
     public EventListenerService(
         DiscordSocketClient client,
-        ILogger<DiscordClientService> logger,
+        ILogger<EventListenerService> logger,
         IConfiguration configuration,
         IHostEnvironment environment,
         IServiceProvider serviceProvider,
@@ -32,19 +32,19 @@ public class EventListenerService : PlungerService
         return Task.CompletedTask;
     }
 
-    private Task ChatFilterListener(SocketMessage message)
+    private async Task ChatFilterListener(SocketMessage message)
     {
         var channel = message.Channel as SocketGuildChannel;
         var messageContent = message.Content.ToLower().Split(" ").ToList();
 
-        if (message.Author.IsBot) return Task.CompletedTask;
+        if (message.Author.IsBot) return;
         var Filter = ChatFilterCache.Filter[channel!.Guild.Id];
-        if (Filter is null) return Task.CompletedTask;
+        if (Filter is null) return;
 
         List<string> wordsUsed = new();
         bool shouldDelete = false;
 
-        messageContent.ForEach(word =>
+        messageContent.ForEach(async word =>
         {
             if (Filter.Contains(word))
             {
@@ -54,7 +54,7 @@ public class EventListenerService : PlungerService
 
             if (shouldDelete)
             {
-                message.DeleteAsync();
+                await message.DeleteAsync();
             }
         });
 
@@ -62,13 +62,13 @@ public class EventListenerService : PlungerService
         {
             var id = ChatFilterCache.FilterLogs[channel.Guild.Id];
             string channelId = id.ToString();
-            if (channelId is null) return Task.CompletedTask;
+            if (channelId is null) return;
             var currentChannel = channel.Guild.GetChannel(id) as SocketTextChannel;
 
             var Embed = new EmbedBuilder()
                 .WithColor(Colors.Random)
-                .WithAuthor($"{message.Author.Username}#{message.Author.Discriminator}"
-                    , message.Author.GetAvatarUrl() ?? message.Author.GetDefaultAvatarUrl())
+                .WithAuthor($"{message.Author.Username}#{message.Author.Discriminator}",
+                    message.Author.GetAvatarUrl() ?? message.Author.GetDefaultAvatarUrl())
                 .WithDescription($"Used {wordsUsed.Count} filtered word in <#{channel.Id}>")
                 .AddField(x =>
                 {
@@ -78,8 +78,7 @@ public class EventListenerService : PlungerService
                         x.Value += $"{w}\n";
                     });
                 }).Build();
-            currentChannel!.SendMessageAsync(embed: Embed);
+            await currentChannel!.SendMessageAsync(embed: Embed);
         }
-        return Task.CompletedTask;
     }
 }

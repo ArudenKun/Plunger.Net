@@ -16,7 +16,7 @@ public class EventsService : PlungerService
 {
     public EventsService(
         DiscordSocketClient client,
-        ILogger<DiscordClientService> logger,
+        ILogger<EventsService> logger,
         IConfiguration configuration,
         IHostEnvironment environment,
         IServiceProvider serviceProvider,
@@ -33,15 +33,15 @@ public class EventsService : PlungerService
         return Task.CompletedTask;
     }
 
-    private Task ChatFilterEvent()
+    private async Task ChatFilterEvent()
     {
         foreach (var guild in Client.Guilds)
         {
-            var document = Database.Guilds!.Where(x => x.Id == guild.Id).ToList();
+            var document = Database.Guilds!.Where(x => x.Id == guild.Id).ToAsyncEnumerable();
 
-            if (document == null) return Task.CompletedTask;
+            if (document == null) return;
 
-            document.ForEach(x =>
+            await document.ForEachAsync(x =>
             {
                 var k = guild.Id;
                 x.Words.ForEach(w =>
@@ -56,20 +56,18 @@ public class EventsService : PlungerService
                     }
                 });
                 ChatFilterCache.FilterLogs.Add(k, x.LoggingChannelId);
-
             });
-
         }
-        return Task.CompletedTask;
+        return;
     }
 
-    private Task LockdownCheckEvent()
+    private async Task LockdownCheckEvent()
     {
         foreach (var guild in Client.Guilds)
         {
-            var lockdown = Database.Lockdowns!.Where(x => x.GuildId == guild.Id).ToList();
-            if (lockdown == null) return Task.CompletedTask;
-            lockdown.ForEach(async d =>
+            var lockdown = Database.Lockdowns!.Where(x => x.GuildId == guild.Id).ToAsyncEnumerable();
+            if (lockdown == null) return;
+            await lockdown.ForEachAsync(async d =>
             {
                 if (guild.Channels.FirstOrDefault(x => x.Id == d.ChannelId) is not SocketTextChannel channel) return;
                 if (await channel.GetMessageAsync(d.MessageId) is not IUserMessage message) return;
@@ -90,7 +88,6 @@ public class EventsService : PlungerService
                     });
                     return;
                 }
-
                 var Expire = d.Duration - DateTimeOffset.Now;
                 await Task.Delay(Expire);
                 await channel.AddPermissionOverwriteAsync(
@@ -107,6 +104,5 @@ public class EventsService : PlungerService
                 });
             });
         }
-        return Task.CompletedTask;
     }
 }

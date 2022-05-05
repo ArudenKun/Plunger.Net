@@ -7,8 +7,9 @@ public class PlungerDbContextFactory : IDesignTimeDbContextFactory<PlungerDbCont
 {
     public PlungerDbContext CreateDbContext(string[] args)
     {
-        var optionsBuilder = new DbContextOptionsBuilder()
-            .UseSqlite("Data Source=..\\Plunger\\Data.db");
-        return new PlungerDbContext(optionsBuilder.Options);
+        var optionsBuilder = new DbContextOptionsBuilder<PlungerDbContext>()
+            .UseSqlite("Data Source=..\\Plunger\\Data.db")
+            .Options;
+        return new PlungerDbContext(optionsBuilder);
     }
 }

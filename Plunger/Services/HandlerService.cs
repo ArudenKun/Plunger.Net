@@ -23,7 +23,7 @@ public class HandlerService : PlungerService
 
     public HandlerService(
         DiscordSocketClient client,
-        ILogger<DiscordClientService> logger,
+        ILogger<HandlerService> logger,
         IConfiguration configuration,
         IHostEnvironment environment,
         IServiceProvider serviceProvider,
@@ -156,9 +156,8 @@ public class HandlerService : PlungerService
 
         int argPos = 0;
         var user = message.Author as SocketGuildUser;
-        var prefix = Database.Guilds!.FirstOrDefault(x => x.Id == user!.Guild.Id)!.Prefix;
-        if (!message.HasStringPrefix(prefix, ref argPos) && !message.HasMentionPrefix(Client.CurrentUser, ref argPos)) return;
-
+        var data = await Database.Guilds!.FindAsync(user!.Guild.Id);
+        if (!message.HasStringPrefix(data!.Prefix, ref argPos) && !message.HasMentionPrefix(Client.CurrentUser, ref argPos)) return;
         var context = new SocketCommandContext(Client, message);
         await CommandService.ExecuteAsync(context, argPos, ServiceProvider);
     }

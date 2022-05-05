@@ -10,7 +10,7 @@ public class PlungerDbContext : DbContext
     public DbSet<SuggestionEntity>? Suggestions { get; set; }
     public DbSet<LockdownEntity>? Lockdowns { get; set; }
 
-    public PlungerDbContext(DbContextOptions options) : base(options) { }
+    public PlungerDbContext(DbContextOptions<PlungerDbContext> options) : base(options) { }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

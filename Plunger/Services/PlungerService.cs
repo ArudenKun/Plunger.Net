@@ -20,7 +20,7 @@ namespace Plunger.Services
 
         public PlungerService(
             DiscordSocketClient client,
-            ILogger<DiscordClientService> logger,
+            ILogger<PlungerService> logger,
             IConfiguration configuration,
             IHostEnvironment environment,
             IServiceProvider serviceProvider,

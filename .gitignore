@@ -6,6 +6,8 @@
 #Main
 .vscode
 .config
+Data.db-shm
+Data.db-wal
 
 # User-specific files
 *.rsuser

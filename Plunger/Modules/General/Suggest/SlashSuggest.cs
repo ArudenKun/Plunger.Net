@@ -40,18 +40,18 @@ public class SlashSuggest : PlungerInteractionModuleBase
             .Build();
 
         await DeferAsync();
+        var message = await FollowupAsync(embed: Embed, components: Buttons);
         await Database.Suggestions!.AddAsync(new SuggestionEntity()
         {
             GuildId = Context.Guild.Id,
             GuildName = Context.Guild.Name,
-            MessageId = Context.Interaction.Id,
+            MessageId = message.Id,
             MemberId = Context.User.Id,
             Suggestion = suggestion,
             Type = type.ToString(),
             Status = ""
         });
         await Database.SaveChangesAsync();
-        await FollowupAsync(embed: Embed, components: Buttons);
     }
 
     [ComponentInteraction("suggest-accept")]
@@ -59,7 +59,7 @@ public class SlashSuggest : PlungerInteractionModuleBase
     public async Task SuggestAccept()
     {
         var interaction = Context.Interaction as SocketMessageComponent;
-        var suggestion = Database.Suggestions!.FirstOrDefault(x => x.MessageId == interaction!.Message.Interaction.Id);
+        var suggestion = Database.Suggestions!.FirstOrDefault(x => x.MessageId == interaction!.Message.Id);
         if (suggestion is null)
         {
             await RespondAsync("Suggestion does not exist in the database", ephemeral: true);
@@ -103,7 +103,7 @@ public class SlashSuggest : PlungerInteractionModuleBase
     public async Task SuggestDecline()
     {
         var interaction = Context.Interaction as SocketMessageComponent;
-        var suggestion = Database.Suggestions!.FirstOrDefault(x => x.MessageId == interaction!.Message.Interaction.Id);
+        var suggestion = Database.Suggestions!.FirstOrDefault(x => x.MessageId == interaction!.Message.Id);
         if (suggestion is null)
         {
             await RespondAsync("Suggestion does not exist in the database", ephemeral: true);
@@ -147,7 +147,7 @@ public class SlashSuggest : PlungerInteractionModuleBase
     public async Task SuggestFinal()
     {
         var interaction = Context.Interaction as SocketMessageComponent;
-        var suggestion = Database.Suggestions!.FirstOrDefault(x => x.MessageId == interaction!.Message.Interaction.Id);
+        var suggestion = Database.Suggestions!.FirstOrDefault(x => x.MessageId == interaction!.Message.Id);
         if (suggestion is null)
         {
             await RespondAsync("Suggestion does not exist in the database", ephemeral: true);
