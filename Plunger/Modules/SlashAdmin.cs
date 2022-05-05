@@ -1,12 +1,10 @@
 using Discord;
 using Discord.Interactions;
 using Discord.WebSocket;
-using Humanizer;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using Plunger.Database;
-using Plunger.Database.Models;
+using Plunger.Data;
 
 namespace Plunger.Modules;
 
@@ -21,8 +19,8 @@ public class SlashAdmin : PlungerInteractionModuleBase
         IConfiguration configuration,
         IHostEnvironment hostEnvironment,
         IHttpClientFactory httpClientFactory,
-        ILogger<PlungerInteractionModuleBase> logger,
-        PlungerDatabase database,
+        ILogger<SlashAdmin> logger,
+        PlungerDbContext database,
         IHost host) : base(configuration, hostEnvironment, httpClientFactory, logger, database)
     {
         _host = host;
@@ -43,101 +41,6 @@ public class SlashAdmin : PlungerInteractionModuleBase
         await _host.StopAsync();
     }
 
-    [Group("lockdown", "lockdown commands")]
-    public class SlashLockdown : PlungerInteractionModuleBase
-    {
-        public SlashLockdown(
-            IConfiguration configuration,
-            IHostEnvironment hostEnvironment,
-            IHttpClientFactory httpClientFactory,
-            ILogger<PlungerInteractionModuleBase> logger,
-            PlungerDatabase database) : base(configuration, hostEnvironment, httpClientFactory, logger, database)
-        {
-        }
-
-        [SlashCommand("lock", "Lockdown the channel")]
-        public async Task Lock(
-            [Summary(description: "Duration of the lockdown")] TimeSpan duration,
-            [Summary(description: "Reason for the lockdown")] string reason = "None")
-        {
-            var totalDuration = DateTimeOffset.Now.ToUnixTimeMilliseconds() + duration.TotalMilliseconds;
-            var guild = Context.Guild;
-            var channel = Context.Interaction.Channel as SocketTextChannel;
-            var embed = new EmbedBuilder();
-
-            if (channel!.PermissionOverwrites.FirstOrDefault().Permissions.SendMessages == PermValue.Deny)
-            {
-                await RespondAsync(embed: embed
-                    .WithColor(Color.DarkRed)
-                    .WithDescription("⛔ | This channel is already locked")
-                    .Build());
-                return;
-            }
-
-            await channel.AddPermissionOverwriteAsync(
-                guild.EveryoneRole,
-                channel.GetPermissionOverwrite(guild.EveryoneRole)!.Value.Modify(sendMessages: PermValue.Deny));
-
-            await Database.InsertDocumentAsync(LockdownCollection, new LockdownModel()
-            {
-                GuildId = guild.Id,
-                ChannelId = channel.Id,
-                ChannelName = channel.Name.Transform(To.TitleCase),
-                Duration = totalDuration,
-                Reason = reason
-            });
-            await RespondAsync(embed: embed
-                        .WithColor(Color.DarkRed)
-                        .WithDescription(
-                            $"🔒 | This channel is under lockdown | Reason: {reason} | Lockdown will be lifted " +
-                            $"<t:{Convert.ToInt64(totalDuration) / 1000}:R>")
-                        .Build());
-
-            await Task.Delay(duration);
-            await channel.AddPermissionOverwriteAsync(
-                guild.EveryoneRole,
-                channel.GetPermissionOverwrite(guild.EveryoneRole)!.Value.Modify(sendMessages: PermValue.Allow));
-
-            await Database.DeleteDocumentAsync(
-                LockdownCollection,
-                await Database.FindDocumentAsync<LockdownModel>(LockdownCollection, _ => _.GuildId == guild.Id && _.ChannelId == channel.Id));
-            await Context.Interaction.ModifyOriginalResponseAsync(x =>
-            {
-                x.Embed = embed
-                .WithColor(Color.Green)
-                .WithDescription("🔓 | The lockdown has been lifted")
-                .Build();
-            });
-        }
-
-        [SlashCommand("unlock", "Unlock the channel from the lockdown")]
-        public async Task Unlock()
-        {
-            var guild = Context.Guild;
-            var channel = Context.Interaction.Channel as SocketTextChannel;
-            var embed = new EmbedBuilder();
-            var lockdown = await Database.FindDocumentAsync<LockdownModel>(LockdownCollection, _ => _.GuildId == guild.Id && _.ChannelId == channel!.Id);
-
-            if (channel!.PermissionOverwrites.FirstOrDefault().Permissions.SendMessages == PermValue.Allow || lockdown is null)
-            {
-                await RespondAsync(embed: embed
-                    .WithColor(Color.DarkRed)
-                    .WithDescription("⛔ | This channel is not locked")
-                    .Build());
-                return;
-            }
-            
-            await channel.AddPermissionOverwriteAsync(
-                guild.EveryoneRole,
-                channel.GetPermissionOverwrite(guild.EveryoneRole)!.Value.Modify(sendMessages: PermValue.Allow));
-            await Database.DeleteDocumentAsync(LockdownCollection, lockdown);
-            await Context.Interaction.RespondAsync(embed: embed
-                .WithColor(Color.Green)
-                .WithDescription("🔓 | The lockdown has been lifted")
-                .Build());
-        }
-    }
-
     [Group("moderation", "moderation commands")]
     public class AdminModeration : PlungerInteractionModuleBase
     {
@@ -145,8 +48,8 @@ public class SlashAdmin : PlungerInteractionModuleBase
             IConfiguration configuration,
             IHostEnvironment hostEnvironment,
             IHttpClientFactory httpClientFactory,
-            ILogger<PlungerInteractionModuleBase> logger,
-            PlungerDatabase database) : base(configuration, hostEnvironment, httpClientFactory, logger, database)
+            ILogger<AdminModeration> logger,
+            PlungerDbContext database) : base(configuration, hostEnvironment, httpClientFactory, logger, database)
         {
         }
 

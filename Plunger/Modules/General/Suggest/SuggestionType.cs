@@ -1,4 +1,4 @@
-namespace Plunger.Models.Enums;
+namespace Plunger.Modules.General.Suggestion;
 
 public enum SuggestionType
 {
@@ -7,4 +7,3 @@ public enum SuggestionType
     System,
     Other,
 }
-

@@ -4,13 +4,10 @@ using Discord.WebSocket;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using MongoDB.Driver;
-using Plunger.Database;
-using Plunger.Database.Models;
-using Plunger.Models.Enums;
-using static Plunger.Database.Models.SuggestionModel;
+using Plunger.Data;
+using Plunger.Data.Entities;
 
-namespace Plunger.Modules;
+namespace Plunger.Modules.General.Suggestion;
 
 public class SlashSuggest : PlungerInteractionModuleBase
 {
@@ -18,8 +15,8 @@ public class SlashSuggest : PlungerInteractionModuleBase
         IConfiguration configuration,
         IHostEnvironment hostEnvironment,
         IHttpClientFactory httpClientFactory,
-        ILogger<PlungerInteractionModuleBase> logger,
-        PlungerDatabase database) : base(configuration, hostEnvironment, httpClientFactory, logger, database)
+        ILogger<SlashSuggest> logger,
+        PlungerDbContext database) : base(configuration, hostEnvironment, httpClientFactory, logger, database)
     {
     }
 
@@ -43,20 +40,17 @@ public class SlashSuggest : PlungerInteractionModuleBase
             .Build();
 
         await DeferAsync();
-        await Database.InsertDocumentAsync(SuggestionCollection, new SuggestionModel()
+        await Database.Suggestions!.AddAsync(new SuggestionEntity()
         {
             GuildId = Context.Guild.Id,
+            GuildName = Context.Guild.Name,
             MessageId = Context.Interaction.Id,
-            SuggestionDetails = new List<Details>
-                {
-                    new Details
-                    {
-                        MemberId = Context.Interaction.User.Id,
-                        Type = type.ToString(),
-                        Suggestion = suggestion
-                    }
-                }
+            MemberId = Context.User.Id,
+            Suggestion = suggestion,
+            Type = type.ToString(),
+            Status = ""
         });
+        await Database.SaveChangesAsync();
         await FollowupAsync(embed: Embed, components: Buttons);
     }
 
@@ -65,12 +59,10 @@ public class SlashSuggest : PlungerInteractionModuleBase
     public async Task SuggestAccept()
     {
         var interaction = Context.Interaction as SocketMessageComponent;
-        var suggestion = await Database.FindDocumentAsync<SuggestionModel>(SuggestionCollection,
-            _ => _.GuildId == Context.Guild.Id && _.MessageId == interaction!.Message.Interaction.Id);
-
+        var suggestion = Database.Suggestions!.FirstOrDefault(x => x.MessageId == interaction!.Message.Interaction.Id);
         if (suggestion is null)
         {
-            await RespondAsync("Suggestion Does Not Exist In The Database", ephemeral: true);
+            await RespondAsync("Suggestion does not exist in the database", ephemeral: true);
             return;
         }
 
@@ -111,19 +103,10 @@ public class SlashSuggest : PlungerInteractionModuleBase
     public async Task SuggestDecline()
     {
         var interaction = Context.Interaction as SocketMessageComponent;
-
-        // if (!await Database.SuggestionExistAsync(Context.Guild.Id, Interaction!.Message.Interaction.Id))
-        // {
-        //     await RespondAsync("Suggestion Does Not Exist In The Database", ephemeral: true);
-        //     return;
-        // }
-
-        var suggestion = await Database.FindDocumentAsync<SuggestionModel>(SuggestionCollection,
-            _ => _.GuildId == Context.Guild.Id && _.MessageId == interaction!.Message.Interaction.Id);
-
+        var suggestion = Database.Suggestions!.FirstOrDefault(x => x.MessageId == interaction!.Message.Interaction.Id);
         if (suggestion is null)
         {
-            await RespondAsync("Suggestion Does Not Exist In The Database", ephemeral: true);
+            await RespondAsync("Suggestion does not exist in the database", ephemeral: true);
             return;
         }
 
@@ -164,12 +147,10 @@ public class SlashSuggest : PlungerInteractionModuleBase
     public async Task SuggestFinal()
     {
         var interaction = Context.Interaction as SocketMessageComponent;
-        var suggestion = await Database.FindDocumentAsync<SuggestionModel>(SuggestionCollection,
-            _ => _.GuildId == Context.Guild.Id && _.MessageId == interaction!.Message.Interaction.Id);
-
+        var suggestion = Database.Suggestions!.FirstOrDefault(x => x.MessageId == interaction!.Message.Interaction.Id);
         if (suggestion is null)
         {
-            await RespondAsync("Suggestion Does Not Exist in The Database", ephemeral: true);
+            await RespondAsync("Suggestion does not exist in the database", ephemeral: true);
             return;
         }
 
@@ -191,7 +172,8 @@ public class SlashSuggest : PlungerInteractionModuleBase
             x.Embed = newEmbed;
             x.Components = null;
         });
-        await Database.DeleteDocumentAsync(SuggestionCollection, suggestion);
+        Database.Suggestions!.Remove(suggestion);
+        await Database.SaveChangesAsync();
         if (interaction.HasResponded)
         {
             await FollowupAsync("Suggestion Finalized", ephemeral: true);

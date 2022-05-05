@@ -2,8 +2,9 @@ using Discord.Interactions;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Plunger.APIs;
 using Plunger.APIs.Interfaces;
-using Plunger.Database;
+using Plunger.Data;
 
 namespace Plunger.Modules;
 
@@ -15,7 +16,7 @@ public class Test : PlungerInteractionModuleBase
         IHostEnvironment hostEnvironment,
         IHttpClientFactory httpClientFactory,
         ILogger<PlungerInteractionModuleBase> logger,
-        PlungerDatabase database,
+        PlungerDbContext database,
         IPopcat popcat) : base(configuration, hostEnvironment, httpClientFactory, logger, database)
     {
         _popcat = popcat;
@@ -24,7 +25,16 @@ public class Test : PlungerInteractionModuleBase
     [SlashCommand("timepsan", "testing")]
     public async Task TestAsync([Summary("time", "input time")] TimeSpan timeSpan)
     {
-        
+
         await RespondAsync($"{timeSpan}");
+    }
+
+    [SlashCommand("code", "coding shit")]
+    public async Task Code()
+    {
+        Hastebin bin = new(HttpClientFactory);
+        var t = await bin.UploadAsync("test");
+        await DeferAsync();
+        await FollowupAsync(t);
     }
 }

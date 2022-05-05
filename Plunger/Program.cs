@@ -2,23 +2,23 @@
 using Discord.Addons.Hosting;
 using Discord.WebSocket;
 using Fergun.Interactive;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Plunger.APIs;
 using Plunger.APIs.Interfaces;
-using Plunger.Database;
+using Plunger.Data;
 using Plunger.Services;
 using Serilog;
 using Serilog.Events;
-using Serilog.Sinks.SystemConsole.Themes;
 
 Log.Logger = new LoggerConfiguration()
-    .MinimumLevel.Debug()
+    .MinimumLevel.Verbose()
     .MinimumLevel.Override("Microsoft", LogEventLevel.Error)
-    .MinimumLevel.Override("System", LogEventLevel.Warning)
     .Enrich.FromLogContext()
-    .WriteTo.Console(outputTemplate: "[{Timestamp:HH:mm:ss} {Level:u3}] {Message:lj}{NewLine}{Exception}", theme: AnsiConsoleTheme.Literate)
+    // .WriteTo.Console(outputTemplate: "[{Timestamp:HH:mm:ss} {Level:u3}] {Message:lj}{NewLine}{Exception}", theme: AnsiConsoleTheme.Literate)
+    .WriteTo.Console()
     .CreateLogger();
 
 try
@@ -30,8 +30,6 @@ try
             var configuration = new ConfigurationBuilder()
                 .SetBasePath(Directory.GetCurrentDirectory())
                 .AddJsonFile("appsettings.json", false, true)
-                .AddUserSecrets<Program>()
-                .AddEnvironmentVariables()
                 .Build();
             x.AddConfiguration(configuration);
         })
@@ -42,11 +40,10 @@ try
                 LogLevel = LogSeverity.Info,
                 AlwaysDownloadUsers = true,
                 MessageCacheSize = 200,
-                GatewayIntents = GatewayIntents.All
+                GatewayIntents = GatewayIntents.All,
+                LogGatewayIntentWarnings = false
             };
-
             config.Token = context.Configuration["Token"];
-            // config.Token = "ODQ0ODg1NTc5MTYyMDU4Nzgy.YKY7Aw.1z0QMVzYzUwg5_WG6UdyrukRaxI";
             config.LogFormat = (message, exception) => $"{message.Source}: {message.Message}";
         })
         .UseCommandService((context, config) =>
@@ -67,30 +64,18 @@ try
         {
             services
                 .AddHostedService<HandlerService>()
-                .AddSingleton<PlungerDatabase>()
+                .AddHostedService<EventsService>()
+                .AddHostedService<EventListenerService>()
                 .AddSingleton(new InteractiveConfig { DefaultTimeout = TimeSpan.FromMinutes(1) })
                 .AddSingleton<InteractiveService>()
-                .AddHttpClient();
-                
-            services
-                .Configure<PlungerDatabaseConfig>(context.Configuration.GetSection("PlungerDatabase"));
-            
+                .AddHttpClient()
+                .AddDbContext<PlungerDbContext>(_ => 
+                    _.UseSqlite(context.Configuration.GetConnectionString("Default")));
+
+
             services
                 .AddScoped<IPopcat, Popcat>()
                 .AddScoped<IWaifu, Waifu>();
-            // services.AddHttpClient("Popcat", x => x.BaseAddress = new Uri(context.Configuration.GetSection("API")["Popcat"]));
-            // services.AddHttpClient("WaifuPics", x => x.BaseAddress = new Uri(context.Configuration.GetSection("API")["WaifuPics"]));
-
-            // services.AddLavaNode(x =>
-            // {
-            //     x.Hostname = "lavalink.eu";
-            //     x.Authorization = "Raccoon";
-            //     x.Port = 2333;
-
-            //     x.SelfDeaf = false;
-            //     x.LogSeverity = LogSeverity.Info;
-            //     x.BufferSize = 5000;
-            // });
         })
         .UseSerilog()
         .UseConsoleLifetime()

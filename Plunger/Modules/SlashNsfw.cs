@@ -2,10 +2,9 @@ using Discord.Interactions;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using Plunger.APIs;
 using Plunger.APIs.Interfaces;
 using Plunger.APIs.Models.Enums;
-using Plunger.Database;
+using Plunger.Data;
 
 namespace Plunger.Modules;
 
@@ -17,8 +16,8 @@ public class SlashNsfw : PlungerInteractionModuleBase
         IConfiguration configuration,
         IHostEnvironment hostEnvironment,
         IHttpClientFactory httpClientFactory,
-        ILogger<PlungerInteractionModuleBase> logger,
-        PlungerDatabase database,
+        ILogger<SlashNsfw> logger,
+        PlungerDbContext database,
         IWaifu waifu) : base(configuration, hostEnvironment, httpClientFactory, logger, database)
     {
         _waifu = waifu;

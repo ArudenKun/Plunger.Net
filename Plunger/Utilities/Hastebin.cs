@@ -5,7 +5,7 @@ namespace Plunger.APIs;
 
 public class Hastebin
 {
-    public const string HastebinEndpoint = "https://hastebin.com";
+    public const string HastebinEndpoint = "https://www.toptal.com/developers/hastebin";
 
     public const string HatebinEndpoint = "https://hatebin.com";
 
@@ -40,14 +40,17 @@ public class Hastebin
 
         string json = await response.Content.ReadAsStringAsync();
         var temp = JsonConvert.DeserializeObject<HastebinResponse>(json);
-        return GetUrl(HastebinEndpoint, temp.Key);
+        return GetUrl(HastebinEndpoint, temp!.Key!);
     }
 
-    private static string GetUrl(string endpoint, string key) => $"{endpoint}/{key.Trim()}";
+    private static string GetUrl(string endpoint, string key)
+    {
+        return $"{endpoint}/{key.Trim()}";
+    }
 
     private class HastebinResponse
     {
         [JsonProperty]
-        public string Key { get; private set; }
+        public string? Key { get; private set; }
     }
 }

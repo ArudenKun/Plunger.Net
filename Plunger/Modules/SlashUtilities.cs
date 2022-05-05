@@ -6,7 +6,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Plunger.APIs.Interfaces;
 using Plunger.Commons;
-using Plunger.Database;
+using Plunger.Data;
 using Plunger.Utilities;
 
 namespace Plunger.Modules;
@@ -18,8 +18,8 @@ public class SlashUtilities : PlungerInteractionModuleBase
         IConfiguration configuration,
         IHostEnvironment hostEnvironment,
         IHttpClientFactory httpClientFactory,
-        ILogger<PlungerInteractionModuleBase> logger,
-        PlungerDatabase database,
+        ILogger<SlashUtilities> logger,
+        PlungerDbContext database,
         IPopcat popcat) : base(configuration, hostEnvironment, httpClientFactory, logger, database)
     {
         _popcat = popcat;
@@ -61,8 +61,8 @@ public class SlashUtilities : PlungerInteractionModuleBase
             IConfiguration configuration,
             IHostEnvironment hostEnvironment,
             IHttpClientFactory httpClientFactory,
-            ILogger<PlungerInteractionModuleBase> logger,
-            PlungerDatabase database,
+            ILogger<Binary> logger,
+            PlungerDbContext database,
             IPopcat popcat) : base(configuration, hostEnvironment, httpClientFactory, logger, database)
         {
             _popcat = popcat;

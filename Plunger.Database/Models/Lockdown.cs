@@ -1,10 +1,9 @@
-using System.Net.NetworkInformation;
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
 
 namespace Plunger.Database.Models;
 
-public class LockdownModel : IIdentity
+public class Lockdown : IIdentity
 {
     [BsonId]
     public ObjectId ObjectId { get; set; }

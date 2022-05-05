@@ -38,7 +38,6 @@ public class PlungerEmbedBuilder
             {
                 throw new ArgumentException(message: $"Description length must be less than or equal to 2048.", paramName: nameof(Description));
             }
-
             description = value;
         }
     }

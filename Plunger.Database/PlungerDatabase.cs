@@ -12,7 +12,7 @@ namespace Plunger.Database;
 public class PlungerDatabase
 {
     private readonly MongoClient _client;
-    private readonly IMongoDatabase _database;
+    public readonly IMongoDatabase _database;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="PlungerDatabase"/> class with the provided database name.

@@ -9,8 +9,8 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Plunger.Commons;
 using System.Reflection;
-using Plunger.Database;
 using Plunger.TypeConverters;
+using Plunger.Data;
 
 namespace Plunger.Services;
 
@@ -20,6 +20,7 @@ public class HandlerService : PlungerService
     private string? title;
     private string? description;
 
+
     public HandlerService(
         DiscordSocketClient client,
         ILogger<DiscordClientService> logger,
@@ -28,7 +29,7 @@ public class HandlerService : PlungerService
         IServiceProvider serviceProvider,
         CommandService commandService,
         InteractionService interactionService,
-        PlungerDatabase database,
+        PlungerDbContext database,
         IHost host) : base(client, logger, configuration, environment, serviceProvider, commandService, interactionService, database)
     {
         _host = host;
@@ -45,18 +46,13 @@ public class HandlerService : PlungerService
         InteractionService.SlashCommandExecuted += SlashCommandExecuted;
         InteractionService.ContextCommandExecuted += ContextCommandExecuted;
         InteractionService.ComponentCommandExecuted += ComponentCommandExecuted;
-        
+
         InteractionService.AddTypeConverter<TimeSpan>(new TimeSpanConverter());
 
         await CommandService.AddModulesAsync(Assembly.GetEntryAssembly(), ServiceProvider);
         await InteractionService.AddModulesAsync(Assembly.GetEntryAssembly(), ServiceProvider);
 
         await Client.WaitForReadyAsync(stoppingToken);
-        foreach (var guild in Client.Guilds)
-        {
-            await InteractionService.RegisterCommandsToGuildAsync(guild.Id, true);
-        }
-
         foreach (var guild in Client.Guilds)
         {
             await InteractionService.RegisterCommandsToGuildAsync(guild.Id, true);
@@ -71,14 +67,6 @@ public class HandlerService : PlungerService
         // else
         //     await InteractionService.RegisterCommandsGloballyAsync();
 
-        // if (!LavaNode.IsConnected)
-        // {
-        //     await LavaNode.ConnectAsync();
-        // }
-
-        Logger.LogInformation("Connecting to the database...");
-        // bool isDbConnected = false;
-        Exception? dbException = null;
         // try
         // {
         //     // Database = new PlungerDatabase(Configuration["PlungerDatabase:DatabaseName"], Configuration["PlungerDatabase:ConnectionString"]);
@@ -88,20 +76,7 @@ public class HandlerService : PlungerService
         // {
         //     dbException = e;
         // }
-
-        if (Database.IsConnected)
-        {
-            Logger.LogInformation("Connected to the database successfully.");
-        }
-        else
-        {
-            Logger.LogCritical("Could not connect to the database.", dbException);
-            Logger.LogInformation("Ensure the MongoDB server you're trying to log in is running");
-            Logger.LogInformation("and make sure the server credentials in the config file are correct.");
-
-            Console.Write("Closing in 30 seconds... Press any key to exit now.");
-            await _host.StopAsync(TimeSpan.FromSeconds(30.0));
-        }
+        Logger.LogInformation("Bot is ready");
     }
 
     //Command
@@ -172,9 +147,7 @@ public class HandlerService : PlungerService
 
         //Logger.LogInformation($"{message.Author.Username}: {incomingMessage}");
 
-        // int argPos = 0;
-        // var user = message.Author as SocketGuildUser;
-        // var prefix = DataAcessLayer.GetPrefix(user!.Guild.Id);
+        
         // if (!message.HasStringPrefix(Configuration["Prefix"], ref argPos) && !message.HasMentionPrefix(Client.CurrentUser, ref argPos)) return;
 
         // var context = new SocketCommandContext(Client, message);
@@ -182,10 +155,11 @@ public class HandlerService : PlungerService
         // await CommandService.ExecuteAsync(context, argPos, ServiceProvider);
 
         int argPos = 0;
-        if (!message.HasStringPrefix(Configuration["Prefix"], ref argPos) && !message.HasMentionPrefix(Client.CurrentUser, ref argPos)) return;
+        var user = message.Author as SocketGuildUser;
+        var prefix = Database.Guilds!.FirstOrDefault(x => x.Id == user!.Guild.Id)!.Prefix;
+        if (!message.HasStringPrefix(prefix, ref argPos) && !message.HasMentionPrefix(Client.CurrentUser, ref argPos)) return;
 
         var context = new SocketCommandContext(Client, message);
-
         await CommandService.ExecuteAsync(context, argPos, ServiceProvider);
     }
 

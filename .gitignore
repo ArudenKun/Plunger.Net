@@ -5,6 +5,7 @@
 
 #Main
 .vscode
+.config
 
 # User-specific files
 *.rsuser

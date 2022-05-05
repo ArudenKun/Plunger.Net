@@ -3,7 +3,7 @@ using MongoDB.Bson.Serialization.Attributes;
 
 namespace Plunger.Database.Models;
 
-public class SuggestionModel : IIdentity
+public class Suggestion : IIdentity
 {
     [BsonId]
     public ObjectId ObjectId { get; set; }

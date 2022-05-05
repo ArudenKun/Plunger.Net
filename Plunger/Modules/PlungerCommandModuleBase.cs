@@ -2,7 +2,7 @@ using Discord.Commands;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using Plunger.Database;
+using Plunger.Data;
 
 namespace Plunger.Modules;
 
@@ -12,14 +12,14 @@ public class PlungerCommandModuleBase : ModuleBase<SocketCommandContext>
     public readonly IHostEnvironment HostEnvironment;
     public readonly IHttpClientFactory HttpClientFactory;
     public readonly ILogger<PlungerCommandModuleBase> Logger;
-    public readonly PlungerDatabase Database;
+    public readonly PlungerDbContext Database;
 
     public PlungerCommandModuleBase(
         IConfiguration configuration,
         IHostEnvironment hostEnvironment,
         IHttpClientFactory httpClientFactory,
         ILogger<PlungerCommandModuleBase> logger,
-        PlungerDatabase database)
+        PlungerDbContext database)
     {
         Configuration = configuration;
         HostEnvironment = hostEnvironment;

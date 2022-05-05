@@ -5,7 +5,7 @@ using Discord.WebSocket;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using Plunger.Database;
+using Plunger.Data;
 
 namespace Plunger.Services
 {
@@ -16,8 +16,7 @@ namespace Plunger.Services
         public readonly IServiceProvider ServiceProvider;
         public readonly CommandService CommandService;
         public readonly InteractionService InteractionService;
-        public PlungerDatabase Database;
-        // public readonly DataAccessLayer DataAcessLayer;
+        public readonly PlungerDbContext Database;
 
         public PlungerService(
             DiscordSocketClient client,
@@ -27,7 +26,7 @@ namespace Plunger.Services
             IServiceProvider serviceProvider,
             CommandService commandService,
             InteractionService interactionService,
-            PlungerDatabase database)
+            PlungerDbContext database)
            : base(client, logger)
         {
             Configuration = configuration;
