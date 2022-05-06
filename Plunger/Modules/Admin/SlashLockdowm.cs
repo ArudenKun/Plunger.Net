@@ -10,6 +10,7 @@ using Plunger.Data.Entities;
 
 namespace Plunger.Modules.Admin;
 
+[EnabledInDm(false)]
 [Group("lockdown", "lockdown commands")]
 public class SlashLockdown : PlungerInteractionModuleBase
 {

@@ -25,7 +25,6 @@ public class PlungerInteractionModuleBase : InteractionModuleBase<SocketInteract
         HostEnvironment = hostEnvironment;
         HttpClientFactory = httpClientFactory;
         Logger = logger;
-
         Database = database;
     }
 }

@@ -6,8 +6,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Plunger.APIs;
-using Plunger.APIs.Interfaces;
+using Plunger.APIs.WaifuPics;
 using Plunger.Data;
 using Plunger.Services;
 using Serilog;
@@ -56,7 +55,7 @@ try
         })
         .UseInteractionService((context, config) =>
         {
-            config.LogLevel = LogSeverity.Info;
+            config.LogLevel = LogSeverity.Verbose;
             config.DefaultRunMode = Discord.Interactions.RunMode.Async;
             config.UseCompiledLambda = true;
         })
@@ -66,15 +65,13 @@ try
                 .AddHostedService<HandlerService>()
                 .AddHostedService<EventsService>()
                 .AddHostedService<EventListenerService>()
-                .AddSingleton(new InteractiveConfig { DefaultTimeout = TimeSpan.FromMinutes(1) })
                 .AddSingleton<InteractiveService>()
+                .AddScoped<WaifuClient>()
                 .AddHttpClient()
+                .AddSingleton(new WaifuConfiguration { DefaultExcludes = {}})
+                .AddSingleton(new InteractiveConfig { DefaultTimeout = TimeSpan.FromMinutes(1) })
                 .AddDbContext<PlungerDbContext>(_ => 
                     _.UseSqlite(context.Configuration.GetConnectionString("Default")));
-
-            services
-                .AddScoped<IPopcat, Popcat>()
-                .AddScoped<IWaifu, Waifu>();
         })
         .UseSerilog()
         .UseConsoleLifetime()

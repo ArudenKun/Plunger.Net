@@ -20,7 +20,6 @@ public class HandlerService : PlungerService
     private string? title;
     private string? description;
 
-
     public HandlerService(
         DiscordSocketClient client,
         ILogger<HandlerService> logger,

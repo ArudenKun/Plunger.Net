@@ -3,23 +3,19 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Plunger.APIs;
-using Plunger.APIs.Interfaces;
 using Plunger.Data;
 
 namespace Plunger.Modules;
 
 public class Test : PlungerInteractionModuleBase
 {
-    private readonly IPopcat _popcat;
     public Test(
         IConfiguration configuration,
         IHostEnvironment hostEnvironment,
         IHttpClientFactory httpClientFactory,
         ILogger<PlungerInteractionModuleBase> logger,
-        PlungerDbContext database,
-        IPopcat popcat) : base(configuration, hostEnvironment, httpClientFactory, logger, database)
+        PlungerDbContext database) : base(configuration, hostEnvironment, httpClientFactory, logger, database)
     {
-        _popcat = popcat;
     }
 
     [SlashCommand("timepsan", "testing")]

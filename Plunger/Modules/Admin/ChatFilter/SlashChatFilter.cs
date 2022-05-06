@@ -10,6 +10,7 @@ using Plunger.Modules.Admin.ChatFilter;
 
 namespace Plunger.Modules.Admin.ChatFilters;
 
+[EnabledInDm(false)]
 [Group("chat-filter", "Chat filter commands")]
 [RequireUserPermission(GuildPermission.Administrator | GuildPermission.ManageChannels | GuildPermission.ManageMessages)]
 public class SlashChatFilter : PlungerInteractionModuleBase

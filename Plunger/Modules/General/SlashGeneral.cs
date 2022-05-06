@@ -6,13 +6,14 @@ using Plunger.Data;
 
 namespace Plunger.Modules.General;
 
-public class SlashPing : PlungerInteractionModuleBase
+[EnabledInDm(false)]
+public class SlashGeneral : PlungerInteractionModuleBase
 {
-    public SlashPing(
+    public SlashGeneral(
         IConfiguration configuration,
         IHostEnvironment hostEnvironment,
         IHttpClientFactory httpClientFactory,
-        ILogger<SlashPing> logger,
+        ILogger<SlashGeneral> logger,
         PlungerDbContext database) : base(configuration, hostEnvironment, httpClientFactory, logger, database)
     {
     }

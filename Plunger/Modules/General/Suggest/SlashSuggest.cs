@@ -9,6 +9,7 @@ using Plunger.Data.Entities;
 
 namespace Plunger.Modules.General.Suggestion;
 
+[EnabledInDm(false)]
 public class SlashSuggest : PlungerInteractionModuleBase
 {
     public SlashSuggest(

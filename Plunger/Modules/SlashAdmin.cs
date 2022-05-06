@@ -56,7 +56,7 @@ public class SlashAdmin : PlungerInteractionModuleBase
         [SlashCommand("clear", "Deletes messages in the channel (Default: 1, Max: 100)")]
         public async Task Clear(
             [Summary(description: "The amount of messages you want to delete")] int Amount = 1,
-            [Summary(description: "The user messages that you want to delete")] IUser? Target = null)
+            [Summary(description: "The user messages that you want to delete")] IGuildUser? Target = null)
         {
             var messages = await Context.Channel.GetMessagesAsync(Amount + 1).FlattenAsync();
             var Embed = new EmbedBuilder()

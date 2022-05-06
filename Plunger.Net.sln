@@ -5,11 +5,9 @@ VisualStudioVersion = 16.0.30114.105
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Plunger", "Plunger\Plunger.csproj", "{68371DB9-0383-4F10-A3EE-2E54E62F6451}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Plunger.APIs", "Plunger.APIs\Plunger.APIs.csproj", "{95FB3139-1DEF-4E7A-BF27-9FAC99BAFCF4}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Plunger.Data", "Plunger.Data\Plunger.Data.csproj", "{51072164-3A0C-444D-9600-94E6D4F6DAC4}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Plunger.Database", "Plunger.Database\Plunger.Database.csproj", "{646D020C-EA5C-4F6D-B5FC-31E86B8AA255}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Plunger.Commons", "Plunger.Commons\Plunger.Commons.csproj", "{F5249256-47B7-4640-A105-E91016439A88}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -24,17 +22,13 @@ Global
 		{68371DB9-0383-4F10-A3EE-2E54E62F6451}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{68371DB9-0383-4F10-A3EE-2E54E62F6451}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{68371DB9-0383-4F10-A3EE-2E54E62F6451}.Release|Any CPU.Build.0 = Release|Any CPU
-		{95FB3139-1DEF-4E7A-BF27-9FAC99BAFCF4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{95FB3139-1DEF-4E7A-BF27-9FAC99BAFCF4}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{95FB3139-1DEF-4E7A-BF27-9FAC99BAFCF4}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{95FB3139-1DEF-4E7A-BF27-9FAC99BAFCF4}.Release|Any CPU.Build.0 = Release|Any CPU
 		{51072164-3A0C-444D-9600-94E6D4F6DAC4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{51072164-3A0C-444D-9600-94E6D4F6DAC4}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{51072164-3A0C-444D-9600-94E6D4F6DAC4}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{51072164-3A0C-444D-9600-94E6D4F6DAC4}.Release|Any CPU.Build.0 = Release|Any CPU
-		{646D020C-EA5C-4F6D-B5FC-31E86B8AA255}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{646D020C-EA5C-4F6D-B5FC-31E86B8AA255}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{646D020C-EA5C-4F6D-B5FC-31E86B8AA255}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{646D020C-EA5C-4F6D-B5FC-31E86B8AA255}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F5249256-47B7-4640-A105-E91016439A88}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F5249256-47B7-4640-A105-E91016439A88}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F5249256-47B7-4640-A105-E91016439A88}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F5249256-47B7-4640-A105-E91016439A88}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
