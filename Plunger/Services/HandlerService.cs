@@ -38,7 +38,7 @@ public class HandlerService : PlungerService
     {
         // Process the InteractionCreated payloads to execute Interactions commands
         Client.InteractionCreated += HandleInteraction;
-        Client.MessageReceived += OnMessageReceived;
+        Client.MessageReceived += HandleMessage;
 
         // Process the command execution results
         CommandService.CommandExecuted += CommandExecuted;
@@ -65,21 +65,11 @@ public class HandlerService : PlungerService
         //     }
         // else
         //     await InteractionService.RegisterCommandsGloballyAsync();
-
-        // try
-        // {
-        //     // Database = new PlungerDatabase(Configuration["PlungerDatabase:DatabaseName"], Configuration["PlungerDatabase:ConnectionString"]);
-        //     isDbConnected = Database.IsConnected;
-        // }
-        // catch (TimeoutException e)
-        // {
-        //     dbException = e;
-        // }
         Logger.LogInformation("Bot is ready");
     }
 
     //Command
-    public async Task CommandExecuted(Optional<CommandInfo> command, ICommandContext context, Discord.Commands.IResult result)
+    private async Task CommandExecuted(Optional<CommandInfo> command, ICommandContext context, Discord.Commands.IResult result)
     {
         Logger.LogInformation("User {user} attempted to use command {command}", context.User.Username, command.Value.Name);
 
@@ -139,7 +129,7 @@ public class HandlerService : PlungerService
         await context.Channel.SendMessageAsync(embed: error);
     }
 
-    private async Task OnMessageReceived(SocketMessage incomingMessage)
+    private async Task HandleMessage(SocketMessage incomingMessage)
     {
         if (incomingMessage is not SocketUserMessage message) return;
         if (message.Source != MessageSource.User) return;

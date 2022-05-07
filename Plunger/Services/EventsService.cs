@@ -1,8 +1,6 @@
 using Discord;
-using Discord.Addons.Hosting;
 using Discord.Commands;
 using Discord.Interactions;
-using Discord.Rest;
 using Discord.WebSocket;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
@@ -28,9 +26,14 @@ public class EventsService : PlungerService
 
     protected override Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        Client.Ready += LockdownCheckEvent;
-        Client.Ready += ChatFilterEvent;
+        Client.Ready += ReadyEvent;
         return Task.CompletedTask;
+    }
+
+    private async Task ReadyEvent()
+    {
+        await ChatFilterEvent();
+        await LockdownCheckEvent();
     }
 
     private async Task ChatFilterEvent()
@@ -58,7 +61,6 @@ public class EventsService : PlungerService
                 ChatFilterCache.FilterLogs.Add(k, x.LoggingChannelId);
             });
         }
-        return;
     }
 
     private async Task LockdownCheckEvent()

@@ -29,24 +29,7 @@ public class SlashChatFilter : PlungerInteractionModuleBase
     public async Task Settings(
         [Summary(description: "Select the logging channel")] ITextChannel channel)
     {
-
-        // var settings = await Database.Guilds!.FindAsync(Context.Guild.Id);
-        // if (settings == null)
-        // {
-        //     await Database.Guilds.AddAsync(new GuildEntity()
-        //     {
-        //         Id = Context.Guild.Id,
-        //         LoggingChannelId = channel.Id
-        //     });
-        //     await Database.SaveChangesAsync();
-        //     ChatFilterCache.FilterLogs.Add(Context.Guild.Id, channel.Id);
-        //     await RespondAsync($"<#{channel.Id}>has been set as the logging channel for the chat filter", ephemeral: true);
-        //     return;
-        // }
-        // ChatFilterCache.FilterLogs.Add(Context.Guild.Id, channel.Id);
-        // settings.LoggingChannelId = channel.Id;
-        // Database.Guilds.Update(settings);
-        // await Database.SaveChangesAsync();
+        await DeferAsync();
         await Database.Guilds!.Upsert(new GuildEntity
         {
             Id = Context.Guild.Id,
@@ -60,13 +43,12 @@ public class SlashChatFilter : PlungerInteractionModuleBase
         await Database.SaveChangesAsync();
         if (ChatFilterCache.FilterLogs.ContainsValue(channel.Id))
         {
-            await RespondAsync($"<#{channel.Id}> has been set as the logging channel for the chat filter", ephemeral: true);
+            await FollowupAsync($"<#{channel.Id}> has been set as the logging channel for the chat filter", ephemeral: true);
             return;
         }
         ChatFilterCache.FilterLogs.Add(Context.Guild.Id, channel.Id);
-        await RespondAsync($"<#{channel.Id}> has been set as the logging channel for the chat filter", ephemeral: true);
+        await FollowupAsync($"<#{channel.Id}> has been set as the logging channel for the chat filter", ephemeral: true);
     }
-
 
     [SlashCommand("configuration", "Chat filter configuration")]
     public async Task Configurations(

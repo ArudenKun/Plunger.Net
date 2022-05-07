@@ -8,11 +8,11 @@ namespace Plunger.Modules;
 
 public class PlungerCommandModuleBase : ModuleBase<SocketCommandContext>
 {
-    public readonly IConfiguration Configuration;
-    public readonly IHostEnvironment HostEnvironment;
-    public readonly IHttpClientFactory HttpClientFactory;
-    public readonly ILogger<PlungerCommandModuleBase> Logger;
-    public readonly PlungerDbContext Database;
+    private protected readonly IConfiguration Configuration;
+    private protected readonly IHostEnvironment HostEnvironment;
+    private protected readonly IHttpClientFactory HttpClientFactory;
+    private protected readonly ILogger<PlungerCommandModuleBase> Logger;
+    private protected readonly PlungerDbContext Database;
 
     public PlungerCommandModuleBase(
         IConfiguration configuration,

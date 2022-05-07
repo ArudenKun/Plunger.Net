@@ -6,7 +6,11 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Plunger.APIs.WaifuPics;
+using Plunger.APIs.Nekobot;
+using Plunger.APIs.Popcat;
+using Plunger.APIs.Reddit;
+using Plunger.APIs.Waifu.Im;
+using Plunger.APIs.Waifu.Pics;
 using Plunger.Data;
 using Plunger.Services;
 using Serilog;
@@ -65,13 +69,21 @@ try
                 .AddHostedService<HandlerService>()
                 .AddHostedService<EventsService>()
                 .AddHostedService<EventListenerService>()
-                .AddSingleton<InteractiveService>()
-                .AddScoped<WaifuClient>()
                 .AddHttpClient()
-                .AddSingleton(new WaifuConfiguration { DefaultExcludes = {}})
+                .AddSingleton<InteractiveService>()
                 .AddSingleton(new InteractiveConfig { DefaultTimeout = TimeSpan.FromMinutes(1) })
-                .AddDbContext<PlungerDbContext>(_ => 
+                .AddDbContext<PlungerDbContext>(_ =>
                     _.UseSqlite(context.Configuration.GetConnectionString("Default")));
+
+
+            // * APIs
+            services
+                .AddScoped<IPopcatClient, PopcatClient>()
+                .AddScoped<INekobotClient, NekobotClient>()
+                .AddScoped<IWaifuPicsClient, WaifuPicsClient>()
+                .AddScoped<IWaifuImClient, WaifuImClient>()
+                .AddScoped<IRedditClient, RedditClient>();
+
         })
         .UseSerilog()
         .UseConsoleLifetime()

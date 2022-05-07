@@ -11,12 +11,12 @@ namespace Plunger.Services
 {
     public abstract class PlungerService : DiscordClientService
     {
-        public readonly IConfiguration Configuration;
-        public readonly IHostEnvironment Environment;
-        public readonly IServiceProvider ServiceProvider;
-        public readonly CommandService CommandService;
-        public readonly InteractionService InteractionService;
-        public readonly PlungerDbContext Database;
+        private protected readonly IConfiguration Configuration;
+        private protected readonly IHostEnvironment Environment;
+        private protected readonly IServiceProvider ServiceProvider;
+        private protected readonly CommandService CommandService;
+        private protected readonly InteractionService InteractionService;
+        private protected readonly PlungerDbContext Database;
 
         public PlungerService(
             DiscordSocketClient client,
