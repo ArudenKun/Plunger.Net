@@ -51,61 +51,78 @@ public class EventListenerService : PlungerService
     private static async Task ChatFilterListener(SocketMessage message)
     {
         var originalChannel = message.Channel as SocketGuildChannel;
-        var messageContent = message.Content.ToLower().Split(" ").ToList();
+        var messageContent = message.Content.ToLower();
 
         if (message.Author.IsBot) return;
         var Filter = ChatFilterCache.Filter[originalChannel!.Guild.Id];
         if (Filter is null) return;
 
-        List<string> wordsUsed = new();
-        bool shouldDelete = false;
-
-        messageContent.ForEach(word =>
-        {
-            if (Filter.Contains(word))
-            {
-                wordsUsed.Add(word);
-                shouldDelete = true;
-            }
-        });
-        if (shouldDelete)
+        bool anyMatch = Filter.Any(f => f.Contains(messageContent));
+        if (anyMatch)
         {
             await message.DeleteAsync();
-        }
-        else return;
-
-        if (wordsUsed is not null)
-        {
-            var id = ChatFilterCache.FilterLogs[originalChannel.Guild.Id];
-            string channelId = id.ToString();
-            if (channelId is null) return;
-            if (originalChannel.Guild.GetChannel(id) is not SocketTextChannel channel) return;
-
+            SocketGuildChannel channel = originalChannel!.Guild.GetTextChannel(id: ChatFilterCache.FilterLogs[originalChannel.Guild.Id]);
             var Embed = new EmbedBuilder()
                 .WithColor(Colors.Random)
                 .WithAuthor($"{message.Author.Username}#{message.Author.Discriminator}",
                     message.Author.GetAvatarUrl() ?? message.Author.GetDefaultAvatarUrl())
-                .WithDescription($"Used {wordsUsed.Count} filtered word in <#{originalChannel.Id}>")
-                .AddField(x =>
-                {
-                    x.Name = "**Filtered Word Used**";
-                    wordsUsed.ForEach((w) =>
-                    {
-                        x.Value += $"{w}\n";
-                    });
-                }).Build();
+                .WithDescription($"Used a filtered word in <#{originalChannel.Id}>")
+                .Build();
 
-
-            await channel!.SendMessageAsync(embed: Embed);
+            await ((SocketTextChannel)channel).SendMessageAsync(embed: Embed);
         }
+        else
+        {
+            return;
+        }
+        // List<string> wordsUsed = new();
+        // bool shouldDelete = false;
+        // messageContent.ForEach(word =>
+        // {
+        //     if (Filter.Contains(word))
+        //     {
+        //         wordsUsed.Add(word);
+        //         shouldDelete = true;
+        //     }
+        // });
+        // if (shouldDelete)
+        // {
+        //     await message.DeleteAsync();
+        // }
+        // else return;
+
+        // if (wordsUsed is not null)
+        // {
+        //     var id = ChatFilterCache.FilterLogs[originalChannel.Guild.Id];
+        //     string channelId = id.ToString();
+        //     if (channelId is null) return;
+        //     if (originalChannel.Guild.GetChannel(id) is not SocketTextChannel channel) return;
+
+        //     var Embed = new EmbedBuilder()
+        //         .WithColor(Colors.Random)
+        //         .WithAuthor($"{message.Author.Username}#{message.Author.Discriminator}",
+        //             message.Author.GetAvatarUrl() ?? message.Author.GetDefaultAvatarUrl())
+        //         .WithDescription($"Used {wordsUsed.Count} filtered word in <#{originalChannel.Id}>")
+        //         .AddField(x =>
+        //         {
+        //             x.Name = "**Filtered Word Used**";
+        //             wordsUsed.ForEach((w) =>
+        //             {
+        //                 x.Value += $"{w}\n";
+        //             });
+        //         }).Build();
+
+
+        //     await channel!.SendMessageAsync(embed: Embed);
+        // }
     }
 
     private async Task ChatBotListener(SocketMessage message)
     {
-        var Channel = message.Channel as SocketTextChannel;
-        var Author = message.Author;
-        var Data = await Database.Guilds!.FirstOrDefaultAsync(x => x.Id == Channel!.Guild.Id);
-        if (Data is null) return;
+        var channel = message.Channel as SocketTextChannel;
+        var author = message.Author;
+        var data = await Database.Guilds!.FirstOrDefaultAsync(x => x.Id == channel!.Guild.Id);
+        if (data is null) return;
         // if (Data.ChatBotChannelId == 0)
         // {
         //      Channel!.EnterTypingState();
@@ -115,9 +132,9 @@ public class EventListenerService : PlungerService
 
         // Logger.LogInformation($"{Channel!.Id} {Data.ChatBotChannelId}");
         if (message.Author.IsBot) return;
-        if (Channel!.Id != Data!.ChatBotChannelId) return;
+        if (channel!.Id != data!.ChatBotChannelId) return;
 
-        var Chatbot = await _popcatClient.Chatbot(new ChatbotParams { Message = message.Content });
-        await Channel!.SendMessageAsync(Chatbot.Response);
+        var chatbot = await _popcatClient.Chatbot(new ChatbotParams { Message = message.Content });
+        await channel!.SendMessageAsync(chatbot.Response);
     }
 }

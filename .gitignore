@@ -8,6 +8,8 @@
 .config
 Data.db-shm
 Data.db-wal
+.idea
+
 
 # User-specific files
 *.rsuser
